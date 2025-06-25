@@ -1,5 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
+type UserRole = 'INTERN' | 'ENGINEER' | 'ADMIN';
+export type User = {
+  name: string;
+  email: string;
+  role: UserRole;
+};
+
 @Injectable()
 export class UsersService {
   private users = [
@@ -30,13 +37,9 @@ export class UsersService {
     );
   }
 
-  createUser(user: {
-    name: string;
-    email: string;
-    role: 'INTERN' | 'ENGINEER' | 'ADMIN';
-  }) {
+  createUser(user: User) {
     const userByHighestId = [...this.users].sort((a, b) => {
-      return (b.id = a.id);
+      return b.id - a.id;
     });
 
     const newUser = {
@@ -46,5 +49,23 @@ export class UsersService {
 
     this.users.push(newUser);
     return newUser;
+  }
+
+  updateUser(id: number, user: User) {
+    const userIndex = this.users.findIndex((u) => u.id === id);
+    if (userIndex > -1) {
+      this.users[userIndex] = { id, ...user };
+      return this.users[userIndex];
+    }
+    return null;
+  }
+
+  deleteUserById(id: number) {
+    const userIndex = this.users.findIndex((user) => user.id === id);
+    if (userIndex > -1) {
+      this.users.splice(userIndex, 1);
+      return { message: `User with id ${id} deleted successfully.` };
+    }
+    return { message: `User with id ${id} not found.` };
   }
 }
